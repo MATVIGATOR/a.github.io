@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>빛나의 중학교 신문사설 검색</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Noto+Sans+KR:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #4f46e5;
+            --accent: #f59e0b;
+            --bg-grad: linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 100%);
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --text-main: #1f2937;
+            --text-sub: #4b5563;
+            --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: var(--bg-grad);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        h1 {
+            font-family: 'Gowun Dodum', serif;
+            font-size: 3rem;
+            color: var(--primary);
+            text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.05);
+            margin-bottom: 0.5rem;
+        }
+
+        p.subtitle {
+            color: var(--text-sub);
+            font-size: 1.1rem;
+        }
+
+        /* Dashboard Grid */
+        .search-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .search-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .search-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .search-card.full-width {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%);
+            border: 2px solid var(--primary);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--secondary);
+        }
+
+        .card-header i {
+            margin-right: 0.5rem;
+            font-size: 1.4rem;
+        }
+
+        .input-group {
+            position: relative;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border-radius: 0.8rem;
+            border: 1px solid #d1d5db;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+            outline: none;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        button.search-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 0.8rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+
+        button.search-btn:hover {
+            background: var(--secondary);
+        }
+
+        .reset-btn {
+            display: block;
+            margin: 2rem auto;
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 2rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+
+        .reset-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Results Area */
+        .results-area {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .editorial-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border-left: 5px solid transparent;
+        }
+
+        .editorial-card:hover {
+            transform: scale(1.02);
+            border-left-color: var(--accent);
+        }
+
+        .editorial-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-main);
+        }
+
+        .editorial-meta {
+            font-size: 0.9rem;
+            color: var(--text-sub);
+            margin-bottom: 1rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .editorial-preview {
+            background: #f9fafb;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.95rem;
+            color: #374151;
+        }
+
+        .highlight {
+            background-color: #fef08a;
+            padding: 0 2px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        /* Modal/Details */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: white;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            border-radius: 1.5rem;
+            padding: 2.5rem;
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes modalPop {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: var(--text-sub);
+        }
+
+        .detail-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-label {
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .detail-text {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: #374151;
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 0.8rem;
+        }
+
+        /* Chips for Structure Search */
+        .color-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <header>
+            <h1>📰 빛나의 중학교 신문사설 검색</h1>
+            <p class="subtitle">세상을 보는 눈, 다양한 시각을 찾아보세요</p>
+        </header>
+
+        <div class="search-dashboard">
+            <!-- 1. General Search -->
+            <div class="search-card full-width">
+                <div class="card-header">
+                    <span style="font-size:1.5rem">🔍</span> 통합 검색 (제목 + 전체 내용)
+                </div>
+                <div class="input-group">
+                    <input type="text" id="search-all" placeholder="검색어를 입력하세요 (예: 환경, AI)..."
+                        onkeyup="handleSearch('all', this.value)">
+                    <button class="search-btn" onclick="triggerSearch('all')">검색</button>
+                </div>
+            </div>
+
+            <!-- 2. Author Search -->
+            <div class="search-card">
+                <div class="card-header">
+                    <span style="font-size:1.2rem">✍️</span> 작성자로 검색
+                </div>
+                <div class="input-group">
+                    <input type="text" id="search-author" placeholder="기자/논설위원 이름..."
+                        onkeyup="handleSearch('author', this.value)">
+                </div>
+            </div>
+
+            <!-- 3. Structure - Background -->
+            <div class="search-card">
+                <div class="card-header">
+                    <span style="font-size:1.2rem; color:#e11d48;">📌</span> 배경(Background) 검색
+                </div>
+                <div class="input-group">
+                    <input type="text" id="search-background" placeholder="배경 관련 단어..."
+                        onkeyup="handleSearch('background', this.value)">
+                </div>
+            </div>
+
+            <!-- 4. Structure - Evidence -->
+            <div class="search-card">
+                <div class="card-header">
+                    <span style="font-size:1.2rem; color:#059669;">📊</span> 에비던스(Evidence) 검색
+                </div>
+                <div class="input-group">
+                    <input type="text" id="search-evidence" placeholder="통계, 근거 키워드..."
+                        onkeyup="handleSearch('evidence', this.value)">
+                </div>
+            </div>
+
+            <!-- 5. Structure - Fact -->
+            <div class="search-card">
+                <div class="card-header">
+                    <span style="font-size:1.2rem; color:#7c3aed;">📝</span> 팩트(Fact) 검색
+                </div>
+                <div class="input-group">
+                    <input type="text" id="search-fact" placeholder="사실 관계 확인..."
+                        onkeyup="handleSearch('fact', this.value)">
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align:center; display:none;">
+            <button class="reset-btn" onclick="resetAll()">🔄 초기화</button>
+        </div>
+
+        <div id="results-count" style="margin-bottom: 1rem; font-weight:bold; color: var(--text-sub);"></div>
+        <div id="results-area" class="results-area">
+            <!-- Results will be injected here -->
+        </div>
+    </div>
+
+    <!-- Details Modal -->
+    <div class="modal-overlay" id="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal()">&times;</button>
+            <h2 id="modal-title" style="margin-bottom:0.5rem; font-size:2rem; color:var(--primary);"></h2>
+            <div id="modal-meta" style="color:var(--text-sub); margin-bottom:2rem; font-style:italic;"></div>
+
+            <div class="detail-section">
+                <div class="detail-label" style="color:#e11d48;">배경 (Background)</div>
+                <div class="detail-text" id="modal-background"></div>
+            </div>
+            <div class="detail-section">
+                <div class="detail-label" style="color:#059669;">증거 (Evidence)</div>
+                <div class="detail-text" id="modal-evidence"></div>
+            </div>
+            <div class="detail-section">
+                <div class="detail-label" style="color:#2563eb;">주장 (Argument)</div>
+                <div class="detail-text" id="modal-argument"></div>
+            </div>
+            <div class="detail-section">
+                <div class="detail-label" style="color:#7c3aed;">사실 (Fact)</div>
+                <div class="detail-text" id="modal-fact"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Island -->
+    <script id="xml-data" type="text/xml">
+<?xml version="1.0" encoding="UTF-8"?>
+<editorials xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="editorial.xsd">
+  <editorial id="sample-1">
+    <title><![CDATA[디지털 교육 격차, 공교육이 나서야 한다]]></title>
+    <author>김한글 논설위원</author>
+    <date>2024-01-10</date>
+    <structure>
+      <background><![CDATA[최근 전국 초중고교의 디지털 기기 보급률이 급증하고 있으나, 활용 능력의 격차는 여전히 심각하다.]]></background>
+      <evidence><![CDATA[교육부 통계에 따르면 수도권과 지방 학생 간의 디지털 리터러시 점수 차이가 20% 이상 벌어졌다.]]></evidence>
+      <argument><![CDATA[정부는 기기 보급을 넘어 실질적인 디지털 활용 교육 프로그램을 의무화해야 한다.]]></argument>
+      <fact><![CDATA[현재 디지털 교육 시수는 OECD 평균의 절반 수준인 주당 1시간에 불과하다.]]></fact>
+    </structure>
+  </editorial>
+  <editorial id="sample-2">
+    <title><![CDATA[기후 위기 대응, 기업의 책임 강화해야]]></title>
+    <author>이초록 전문기자</author>
+    <date>2024-01-11</date>
+    <structure>
+      <background><![CDATA[전 지구적인 이상 기후 현상으로 인한 경제적 피해가 매년 최고치를 경신하고 있다.]]></background>
+      <evidence><![CDATA[탄소 배출 상위 10개 기업이 전체 배출량의 40%를 차지한다는 환경단체 보고서가 발표되었다.]]></evidence>
+      <argument><![CDATA[기업의 ESG 경영을 단순 권고가 아닌 법적 의무 사항으로 강화해야만 실효성을 거둘 수 있다.]]></argument>
+      <fact><![CDATA[유럽연합은 이미 공급망 실사법을 통해 기업의 환경 책임을 법제화했다.]]></fact>
+    </structure>
+  </editorial>
+  <editorial id="sample-3">
+    <title><![CDATA[저출산 대책, 현금 살포보다 육아 환경 개선을]]></title>
+    <author>박미래 논설위원</author>
+    <date>2024-01-12</date>
+    <structure>
+      <background><![CDATA[합계출산율 0.7명대가 붕괴될 위기에 처했으나, 현금성 지원 정책은 한계를 드러내고 있다.]]></background>
+      <evidence><![CDATA[출산 장려금을 늘린 지자체에서도 출산율 반등 효과는 미미했다는 연구 결과가 있다.]]></evidence>
+      <argument><![CDATA[육아 휴직의 자유로운 사용과 공공 보육 시설 확충 등 '아이 키우기 좋은 환경'을 만드는 것이 우선이다.]]></argument>
+      <fact><![CDATA[한국의 남성 육아휴직 사용률은 제도는 존재하나 실사용률은 5% 내외로 주요국 중 최하위권이다.]]></fact>
+    </structure>
+  </editorial>
+  <editorial id="sample-4">
+    <title><![CDATA[의대 정원 확대, 지역 의료 붕괴 막을 골든타임]]></title>
+    <author>최생명 의학전문기자</author>
+    <date>2024-01-13</date>
+    <structure>
+      <background><![CDATA[지방 의료원의 의사 구인난이 심화되면서 응급실 뺑뺑이 등 필수 의료 공백 사태가 잇따르고 있다.]]></background>
+      <evidence><![CDATA[지방 국립대병원조차 전공의 정원을 채우지 못해 진료 과목을 폐쇄하는 사례가 속출하고 있다.]]></evidence>
+      <argument><![CDATA[의대 정원을 대폭 확대하고 지역 의사제를 도입하여 의료 인력의 수도권 쏠림 현상을 막아야 한다.]]></argument>
+      <fact><![CDATA[우리나라 의대 입학 정원은 2006년 이후 18년 동안 동결된 상태다.]]></fact>
+    </structure>
+  </editorial>
+  <editorial id="sample-5">
+    <title><![CDATA[가계부채 뇌관, 선제적 관리 필요하다]]></title>
+    <author>정경제 논설실장</author>
+    <date>2024-01-14</date>
+    <structure>
+      <background><![CDATA[고금리 기조가 장기화되면서 영끌로 집을 산 2030 세대와 자영업자의 이자 부담이 한계에 다다랐다.]]></background>
+      <evidence><![CDATA[한국은행 자료에 따르면 가계부채 비율이 GDP 대비 100%를 초과하여 세계 최고 수준을 기록했다.]]></evidence>
+      <argument><![CDATA[금융 당국은 대출 만기 연장 등 미봉책이 아닌, 부실 채권 정리와 채무 조정 등 근본적인 디레버리징 정책을 펴야 한다.]]></argument>
+      <fact><![CDATA[연체율이 지난 1년 사이 2배 이상 급증하며 금융권 부실 우려가 커지고 있다.]]></fact>
+    </structure>
+  </editorial>
+  <editorial id="sample-6">
+    <title><![CDATA[우주 항공청 설립, 미래 산업의 도약대]]></title>
+    <author>강우주 과학전문기자</author>
+    <date>2024-01-15</date>
+    <structure>
+      <background><![CDATA[뉴스페이스 시대를 맞아 세계 각국이 우주 개발 경쟁에 뛰어들고 있으나, 한국은 컨트롤 타워 부재로 뒤처지고 있다.]]></background>
+      <evidence><![CDATA[미국 NASA, 일본 JAXA 등 주요국은 전담 기구를 통해 민간 우주 산업을 주도하고 있다.]]></evidence>
+      <argument><![CDATA[우주항공청 설립법을 조속히 통과시켜 체계적인 우주 개발 로드맵을 수립하고 민간 기업을 육성해야 한다.]]></argument>
+      <fact><![CDATA[한국의 우주 예산 규모는 미국의 100분의 1 수준에 불과하다.]]></fact>
+    </structure>
+  </editorial>
+  <editorial id="sample-7">
+    <title><![CDATA[노인 빈곤율 OECD 1위, 연금 개혁 서둘러야]]></title>
+    <author>오복지 논설위원</author>
+    <date>2024-01-16</date>
+    <structure>
+      <background><![CDATA[급격한 고령화 속에 노인 빈곤 문제가 심각한 사회 문제로 대두되고 있으나 국민연금 개혁은 지지부진하다.]]></background>
+      <evidence><![CDATA[통계청 조사 결과 65세 이상 노인의 상대적 빈곤율은 40%에 육박해 OECD 평균의 3배에 달한다.]]></evidence>
+      <argument><![CDATA[보험료율 인상과 소득 대체율 조정을 포함한 사회적 대타협을 통해 연금의 지속 가능성을 확보해야 한다.]]></argument>
+      <fact><![CDATA[국민연금 고갈 시점이 당초 예상보다 2년 앞당겨진 2055년으로 전망되었다.]]></fact>
+    </structure>
+  </editorial>
+  <editorial id="sample-8">
+    <title><![CDATA[전세 사기 특별법, 피해 구제 실효성 높여야]]></title>
+    <author>송주택 부동산팀장</author>
+    <date>2024-01-17</date>
+    <structure>
+      <background><![CDATA[빌라왕 사태 등 전세 사기가 전국적으로 확산되며 수많은 세입자들이 보증금을 떼일 위기에 처했다.]]></background>
+      <evidence><![CDATA[특별법 시행 이후에도 피해자 인정 요건이 까다로워 실제 구제받은 사례는 전체 피해자의 20% 미만이다.]]></evidence>
+      <argument><![CDATA[피해자 인정 범위를 확대하고, 선구제 후회수 방안을 도입하여 피해자들의 주거 안정을 보장해야 한다.]]></argument>
+      <fact><![CDATA[전세 사기 피해자의 70%가 사회 초년생인 2030 세대이다.]]></fact>
+    </structure>
+  </editorial>
+  <editorial id="sample-9">
+    <title><![CDATA[K-콘텐츠 불법 유통, 저작권 보호 시스템 정비 시급]]></title>
+    <author>문화영 문화부장</author>
+    <date>2024-01-18</date>
+    <structure>
+      <background><![CDATA[한국의 영화, 드라마 등 K-콘텐츠가 세계적인 인기를 얻고 있으나, 불법 스트리밍 사이트로 인한 피해도 급증하고 있다.]]></background>
+      <evidence><![CDATA[업계 추산에 따르면 '누누티비' 등 불법 사이트로 인한 저작권 피해액이 연간 5조 원에 이른다.]]></evidence>
+      <argument><![CDATA[국제 공조 수사를 강화하고, 불법 사이트 차단 기술을 고도화하여 창작자들의 권리를 보호해야 한다.]]></argument>
+      <fact><![CDATA[불법 사이트 운영 서버의 대부분이 해외에 있어 국내법만으로는 처벌이 어려운 실정이다.]]></fact>
+    </structure>
+  </editorial>
+  <editorial id="sample-10">
+    <title><![CDATA[반도체 전쟁, 초격차 기술 확보가 생존 전략]]></title>
+    <author>반도체 산업부</author>
+    <date>2024-01-19</date>
+    <structure>
+      <background><![CDATA[미중 패권 경쟁 심화로 글로벌 반도체 공급망이 재편되면서 한국 반도체 산업이 샌드위치 위기에 처했다.]]></background>
+      <evidence><![CDATA[경쟁국들은 천문학적인 보조금을 지급하며 자국 반도체 생태계를 육성하고 있다.]]></evidence>
+      <argument><![CDATA[세제 혜택 확대와 인프라 지원을 통해 기업의 R&D 투자를 유도하고 초격차 기술 경쟁력을 확보해야 한다.]]></argument>
+      <fact><![CDATA[메모리 반도체 분야에서 경쟁국과의 기술 격차가 1년 이내로 좁혀졌다는 분석이 나왔다.]]></fact>
+    </structure>
+  </editorial>
+</editorials>
+</script>
+
+    <script>
+        // 1. Data Parsing
+        let editorials = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const parser = new DOMParser();
+            const xmlString = document.getElementById('xml-data').textContent;
+            const xmlDoc = parser.parseFromString(xmlString, 'text/xml');
+
+            const items = xmlDoc.getElementsByTagName('editorial');
+
+            for (let item of items) {
+                const getVal = (tag) => {
+                    const node = item.getElementsByTagName(tag)[0];
+                    return node ? node.textContent.trim() : '';
+                }
+
+                // Structure handling
+                const structure = item.getElementsByTagName('structure')[0];
+                const getStrVal = (tag) => {
+                    if (!structure) return '';
+                    const node = structure.getElementsByTagName(tag)[0];
+                    return node ? node.textContent.trim() : '';
+                }
+
+                editorials.push({
+                    id: item.getAttribute('id'),
+                    title: getVal('title'),
+                    author: getVal('author'),
+                    date: getVal('date'),
+                    background: getStrVal('background'),
+                    evidence: getStrVal('evidence'),
+                    argument: getStrVal('argument'),
+                    fact: getStrVal('fact')
+                });
+            }
+
+            // Initial render: show all
+            renderResults(editorials);
+        });
+
+        // 2. Search Logic
+        let currentFilters = {
+            all: '',
+            author: '',
+            background: '',
+            evidence: '',
+            fact: ''
+        };
+
+        function handleSearch(type, value) {
+            currentFilters[type] = value.toLowerCase();
+            filterAndRender();
+
+            // Visual feedback on inputs
+            const inputs = ['all', 'author', 'background', 'evidence', 'fact'];
+            inputs.forEach(id => {
+                const el = document.getElementById('search-' + id);
+                if (currentFilters[id]) {
+                    el.parentElement.parentElement.style.borderColor = 'var(--primary)';
+                    el.parentElement.parentElement.style.backgroundColor = '#fff';
+                } else {
+                    el.parentElement.parentElement.style.borderColor = type === 'all' ? 'var(--primary)' : 'var(--glass-border)';
+                    el.parentElement.parentElement.style.backgroundColor = type === 'all' ? 'linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%)' : 'var(--glass-bg)';
+                }
+            });
+        }
+
+        // Helper to highlight text
+        function highlightText(text, query) {
+            if (!query) return text;
+            const regex = new RegExp(`(${query})`, 'gi');
+            return text.replace(regex, '<span class="highlight">$1</span>');
+        }
+
+        function filterAndRender() {
+            const allQ = currentFilters.all;
+            const authorQ = currentFilters.author;
+            const backQ = currentFilters.background;
+            const evQ = currentFilters.evidence;
+            const factQ = currentFilters.fact;
+
+            // Start with all
+            let results = editorials.filter(item => {
+                // All Search (OR logic across fields)
+                let matchesAll = true;
+                if (allQ) {
+                    const combined = (item.title + item.author + item.background + item.evidence + item.argument + item.fact).toLowerCase();
+                    matchesAll = combined.includes(allQ);
+                }
+
+                // Specific Searches (AND logic between different filters)
+                const matchesAuthor = !authorQ || item.author.toLowerCase().includes(authorQ);
+                const matchesBack = !backQ || item.background.toLowerCase().includes(backQ);
+                const matchesEv = !evQ || item.evidence.toLowerCase().includes(evQ);
+                const matchesFact = !factQ || item.fact.toLowerCase().includes(factQ);
+
+                return matchesAll && matchesAuthor && matchesBack && matchesEv && matchesFact;
+            });
+
+            renderResults(results);
+        }
+
+        function renderResults(results) {
+            const container = document.getElementById('results-area');
+            const countDiv = document.getElementById('results-count');
+
+            container.innerHTML = '';
+            countDiv.textContent = `검색 결과: ${results.length}건`;
+
+            if (results.length === 0) {
+                container.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:3rem; color:var(--text-sub);">검색 결과가 없습니다.</div>`;
+                return;
+            }
+
+            results.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'editorial-card';
+
+                // Highlight preview text based on active filters
+                let previewText = item.background; // Default preview
+                if (currentFilters.evidence) previewText = item.evidence;
+                if (currentFilters.fact) previewText = item.fact;
+                if (currentFilters.all) {
+                    // Find where the match is for 'all' search to show relevant snippet?
+                    // For now, simplfy: show title and a snippet of background
+                }
+
+                // Highlight in title
+                const titleHtml = highlightText(item.title, currentFilters.all);
+
+                card.innerHTML = `
+                <div class="editorial-title">${titleHtml}</div>
+                <div class="editorial-meta">
+                    <span style="color:var(--primary)"><i class="icon">✍️</i> ${highlightText(item.author, currentFilters.author)}</span>
+                    <span>🗓 ${item.date}</span>
+                </div>
+                <div class="editorial-preview">
+                    ${highlightText(previewText.substring(0, 100) + '...', currentFilters.all || currentFilters.background || currentFilters.evidence || currentFilters.fact)}
+                </div>
+                <div style="margin-top:1rem; font-size:0.8rem; color:#9ca3af; text-align:right;">클릭하여 자세히 보기</div>
+            `;
+
+                card.onclick = () => openModal(item);
+                container.appendChild(card);
+            });
+        }
+
+        // Modal Functions
+        const modal = document.getElementById('modal');
+
+        function openModal(item) {
+            document.getElementById('modal-title').textContent = item.title;
+            document.getElementById('modal-meta').textContent = `${item.author} | ${item.date}`;
+
+            const setHighlight = (id, text, query) => {
+                document.getElementById(id).innerHTML = highlightText(text, query);
+            };
+
+            // Combine queries for highlighting... or just use specific ones
+            // If 'all' is used, highlight everywhere. Specific filters highlight specific fields.
+            const allQ = currentFilters.all;
+
+            setHighlight('modal-background', item.background, allQ || currentFilters.background);
+            setHighlight('modal-evidence', item.evidence, allQ || currentFilters.evidence);
+            setHighlight('modal-argument', item.argument, allQ);
+            setHighlight('modal-fact', item.fact, allQ || currentFilters.fact);
+
+            modal.classList.add('open');
+        }
+
+        function closeModal() {
+            modal.classList.remove('open');
+        }
+
+        // Close on outside click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+
+        function triggerSearch(type) {
+            // Just for the button visual, functionality is already via onkeyup
+            // But if user hits enter/button, maybe scroll to results?
+            const resultsArea = document.getElementById('results-area');
+            resultsArea.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function resetAll() {
+            ['search-all', 'search-author', 'search-background', 'search-evidence', 'search-fact'].forEach(id => {
+                document.getElementById(id).value = '';
+            });
+            currentFilters = { all: '', author: '', background: '', evidence: '', fact: '' };
+            renderResults(editorials);
+            handleSearch('all', ''); // Reset styles
+        }
+
+    </script>
+</body>
+
+</html>
